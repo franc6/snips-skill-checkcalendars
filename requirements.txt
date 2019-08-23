@@ -1,0 +1,4 @@
+snipskit[hermes,mqtt]>=0.5.3
+
+caldav
+ics
