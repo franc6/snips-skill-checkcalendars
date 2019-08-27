@@ -1,4 +1,5 @@
 snipskit[hermes,mqtt]>=0.5.3
 
-caldav
-ics
+arrow
+dumper
+simple-rest-client
