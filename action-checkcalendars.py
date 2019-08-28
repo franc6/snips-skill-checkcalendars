@@ -100,7 +100,7 @@ class CheckCalendarsApp(HermesSnipsApp):
             event_list = self._get_events(calendar, start, end)
         else:
             event_list = []
-            for calendar in self.config['secret']['calendars']:
+            for calendar in self.calendars:
                 event_list.append(self._get_events(calendar, start, end))
 
         # Build our response string...
