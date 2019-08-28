@@ -108,6 +108,7 @@ class CheckCalendarsApp(HermesSnipsApp):
         if len(event_list) != 0:
             now = arrow.now()
             for event in event_list:
+                dump(event)
                 start_time = arrow.get(event['start'])
                 end_time = arrow.get(event['end'])
                 td = end_time - start_time
