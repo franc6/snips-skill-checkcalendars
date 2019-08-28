@@ -112,7 +112,8 @@ class CheckCalendarsApp(HermesSnipsApp):
                 end_time = arrow.get(event['end'])
                 td = end_time - start_time
                 if td.days == 1 and td.seconds == 0:
-                    events += gettext("STR_EVENT_ALL_DAY").format(day=start_time.strftime('%A'))
+                    events += gettext("STR_EVENT_ALL_DAY") \
+                        .format(subject=event['title'], day=start_time.strftime('%A'))
                 else:
                     td = start_time - now
                     if td.days == 0 and td.seconds <= 7200:
