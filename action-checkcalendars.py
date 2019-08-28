@@ -101,19 +101,18 @@ class CheckCalendarsApp(HermesSnipsApp):
         else:
             event_list = []
             for calendar in self.calendars:
-                event_list.append(self._get_events(calendar, start, end))
+                event_list.extend(self._get_events(calendar, start, end))
 
         # Build our response string...
         events = ''
         if len(event_list) != 0:
             now = arrow.now()
             for event in event_list:
-                dump(event)
                 start_time = arrow.get(event['start'])
                 end_time = arrow.get(event['end'])
                 td = end_time - start_time
                 if td.days == 1 and td.seconds == 0:
-                    events += gettext("STR_EVENT_ALL_DAY").format(day=start_time.stftime('%A'))
+                    events += gettext("STR_EVENT_ALL_DAY").format(day=start_time.strftime('%A'))
                 else:
                     td = start_time - now
                     if td.days == 0 and td.seconds <= 7200:
