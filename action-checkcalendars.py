@@ -67,16 +67,16 @@ class CheckCalendarsApp(HermesSnipsApp):
                 dump(slot_value.value)
                 timeref = str(date_slot.raw_value)
                 if isinstance(slot_value.value, InstantTimeValue):
-                    start = arrow.get(slot_value.value.value)
-                    if slot_value.grain == Grain.DAY:
+                    start = arrow.get(slot_value.value.value, "YYYY-MM-DD HH:mm:ss ZZ")
+                    if slot_value.value.grain == Grain.DAY:
                         end = start.ceil('day')
-                    if slot_value.grain == Grain.WEEK:
+                    if slot_value.value.grain == Grain.WEEK:
                         # TODO: Figure out how to fix up start & end based on start of week
                         end = start.ceil('day')
                         end += timedelta(days=7)
                 if isinstance(slot_value.value, TimeIntervalValue):
-                    start = arrow.get(slot_value.value['from'])
-                    end = arrow.get(slot_value.value.to)
+                    start = arrow.get(slot_value.value['from'], "YYYY-MM-DD HH:mm:ss ZZ")
+                    end = arrow.get(slot_value.value['to'], "YYYY-MM-DD HH:mm:ss ZZ")
 
         # if timeref wasn't set, then we should jsut use today!
         if timeref is None:
