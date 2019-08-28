@@ -20,6 +20,11 @@ from hermes_python.ontology.injection import (
     InjectionRequestMessage,
     AddFromVanillaInjectionRequest
     )
+from hermes_python.ontology.dialogue import (
+    InstantTimeValue,
+    TimeIntervalValue
+    )
+from hermes_python.ffi.ontology import Grain
 
 from CalendarResource import CalendarResource
 
@@ -61,15 +66,15 @@ class CheckCalendarsApp(HermesSnipsApp):
                 dump(slot_value)
                 dump(slot_value.value)
                 timeref = str(date_slot.raw_value)
-                if slot_value.value.kind == "InstantTime":
+                if isinstance(slot_value.value, InstantTimeValue):
                     start = arrow.get(slot_value.value.value)
-                    if slot_value.grain == "Day":
+                    if slot_value.grain == Grain.DAY:
                         end = start.ceil('day')
-                    if slot_value.grain == "Week":
+                    if slot_value.grain == Grain.WEEK:
                         # TODO: Figure out how to fix up start & end based on start of week
                         end = start.ceil('day')
                         end += timedelta(days=7)
-                if slot_value.value.kind == "TimeInterval":
+                if isinstance(slot_value.value, TimeIntervalValue):
                     start = arrow.get(slot_value.value['from'])
                     end = arrow.get(slot_value.value.to)
 
