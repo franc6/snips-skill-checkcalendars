@@ -15,19 +15,27 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: action-checkcalendars.py:57
-msgid "STR_EVENT"
-msgstr ""
-
-#: action-checkcalendars.py:57
+#: action-checkcalendars.py:168
 msgid "STR_EVENT_ALL_DAY"
 msgstr ""
 
-#: action-checkcalendars.py:58
+#: action-checkcalendars.py:159
+msgid "FORMAT_DATE_TIME_12"
+msgstr ""
+
+#: action-checkcalendars.py:161
+msgid "FORMAT_DATE_TIME_12"
+msgstr ""
+
+#: action-checkcalendars.py:177
+msgid "STR_EVENT"
+msgstr ""
+
+#: action-checkcalendars.py:181
 msgid "STR_EVENTS"
 msgstr ""
 
-#: action-checkcalendars.py:61
+#: action-checkcalendars.py:184
 msgid "STR_NO_EVENTS"
 msgstr ""
 

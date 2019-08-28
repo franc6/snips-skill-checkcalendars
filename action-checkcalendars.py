@@ -6,6 +6,7 @@ import locale
 import os
 import re
 import sys
+import threading
 import warnings
 
 import arrow
@@ -46,6 +47,8 @@ class CheckCalendarsApp(HermesSnipsApp):
     token = None
     url = None
     api = None
+    _nameregex = re.compile(r'[[:space:]`~!@#$%^&*()_-+=[]{}\|;;:,./<>?\'"]')
+    _nameregex2 = re.compile(r'\s+')
 
     @intent('franc:checkCalendar')
     def check_calendar(self, hermes, intent_message):
@@ -57,14 +60,13 @@ class CheckCalendarsApp(HermesSnipsApp):
         now = arrow.now()
         if intent_message.slots is not None:
             if intent_message.slots.Calendar:
-                calendar_name = str(intent_message.slots.Calendar[0].slot_value.value.value)
-                print(calendar_name)
+                calendar_name = self._normalize_calendar_name(str(intent_message.slots.Calendar[0].slot_value.value.value))
+                #calendar_name = str(intent_message.slots.Calendar[0].slot_value.value.value)
+                self._progress("Checking calendar: {}".format(calendar_name))
 
             if intent_message.slots.Date:
                 date_slot = intent_message.slots.Date[0]
                 slot_value = date_slot.slot_value
-                dump(slot_value)
-                dump(slot_value.value)
                 timeref = str(date_slot.raw_value)
                 if isinstance(slot_value.value, InstantTimeValue):
                     start = arrow.get(slot_value.value.value, "YYYY-MM-DD HH:mm:ss ZZ")
@@ -75,8 +77,8 @@ class CheckCalendarsApp(HermesSnipsApp):
                         end = start.ceil('day')
                         end += timedelta(days=7)
                 if isinstance(slot_value.value, TimeIntervalValue):
-                    start = arrow.get(slot_value.value['from'], "YYYY-MM-DD HH:mm:ss ZZ")
-                    end = arrow.get(slot_value.value['to'], "YYYY-MM-DD HH:mm:ss ZZ")
+                    start = arrow.get(slot_value.value.from_date, "YYYY-MM-DD HH:mm:ss ZZ")
+                    end = arrow.get(slot_value.value.to_date, "YYYY-MM-DD HH:mm:ss ZZ")
 
         # if timeref wasn't set, then we should jsut use today!
         if timeref is None:
@@ -94,40 +96,8 @@ class CheckCalendarsApp(HermesSnipsApp):
             # the name of the calendar correctly; ask for clarification
             #if calendar is None:
 
-        # At this point, we know which calendar the user wants, or if the
-        # user wants all calendars, so get the events!
-        if calendar is not None:
-            event_list = self._get_events(calendar, start, end)
-        else:
-            event_list = []
-            for calendar in self.calendars:
-                event_list.extend(self._get_events(calendar, start, end))
-
-        # Build our response string...
-        events = ''
-        if len(event_list) != 0:
-            now = arrow.now()
-            for event in event_list:
-                start_time = arrow.get(event['start'])
-                end_time = arrow.get(event['end'])
-                td = end_time - start_time
-                if td.days == 1 and td.seconds == 0:
-                    events += gettext("STR_EVENT_ALL_DAY") \
-                        .format(subject=event['title'], day=start_time.strftime('%A'))
-                else:
-                    td = start_time - now
-                    if td.days == 0 and td.seconds <= 7200:
-                        start = start_time.humanize()
-                    else:
-                        start = start_time.ctime()
-                    events += gettext("STR_EVENT") \
-                        .format(start=start, end=end_time.ctime(), subject=event['title'])
-            sentence = gettext("STR_EVENTS") \
-                .format(timeref=timeref, events=events)
-        else:
-            sentence = gettext("STR_NO_EVENTS").format(timeref=timeref)
-
-        hermes.publish_end_session(intent_message.session_id, sentence)
+        threading.Timer(interval=0.2, function=self._check_calendars, args=[hermes, intent_message.site_id, calendar, start, end, timeref]).start()
+        hermes.publish_end_session(intent_message.session_id, "Please wait while I check your calendars.")
 
     def initialize(self):
         """Initialization; inject our calendar names"""
@@ -160,7 +130,7 @@ class CheckCalendarsApp(HermesSnipsApp):
         calendar_names = []
         for calendar in self.calendars:
             calendar_names.append(calendar['name'])
-        return AddFromVanillaInjectionRequest({'calendar_names': calendar_names})
+        return AddFromVanillaInjectionRequest({'CalendarName': calendar_names})
 
     def get_update_payload(self):
         """Gets all injection requests as an InjectionRequestMessage"""
@@ -173,14 +143,68 @@ class CheckCalendarsApp(HermesSnipsApp):
         payload = self.get_update_payload()
         self.hermes.request_injection(payload)
 
+    def _check_calendars(self, hermes, site_id, calendar, start, end, timeref):
+        # At this point, we know which calendar the user wants, or if the
+        # user wants all calendars, so get the events!
+        if calendar is not None:
+            event_list = self._get_events(calendar, start, end)
+        else:
+            event_list = []
+            for calendar in self.calendars:
+                event_list.extend(self._get_events(calendar, start, end))
+
+        # Build our response string...
+        events = ''
+        if len(event_list) != 0:
+            date_format = gettext("FORMAT_DATE_TIME_12")
+            if self.config['secret']['Hour'] == 24:
+                date_format = gettext("FORMAT_DATE_TIME_24")
+            now = arrow.now()
+            for event in event_list:
+                start_time = arrow.get(event['start'])
+                end_time = arrow.get(event['end'])
+                td = end_time - start_time
+                if td.days == 1 and td.seconds == 0:
+                    event_text = gettext("STR_EVENT_ALL_DAY") \
+                        .format(subject=event['title'], day=start_time.strftime('%A'))
+                    events += event_text
+                else:
+                    td = start_time - now
+                    if td.days == 0 and td.seconds <= 7200:
+                        start = start_time.humanize(granularity='minute')
+                    else:
+                        start = start_time.strftime(date_format)
+                    event_text = gettext("STR_EVENT") \
+                        .format(start=start, end=end_time.strftime(date_format), subject=event['title'])
+                    events += event_text
+
+            sentence = gettext("STR_EVENTS") \
+                .format(timeref=timeref, events=events)
+        else:
+            sentence = gettext("STR_NO_EVENTS").format(timeref=timeref)
+
+        self._progress(sentence)
+        hermes.publish_start_session_notification(site_id, sentence, None)
+        #hermes.publish_end_session(session_id, sentence)
+
     def _get_events(self, calendar, start, end):
+        self._progress("Getting events for calendar: {}".format(calendar['name']))
         response = self.api.calendars.events(calendar['entity_id'], start, end)
         return response.body
 
     def _get_calendars(self):
         response = self.api.calendars.list()
         for calendar in response.body:
+            calendar['name'] = self._normalize_calendar_name(calendar['name'])
             self.calendars.append(calendar)
+
+    def _normalize_calendar_name(self, name):
+        name = self._nameregex.sub(' ', name)
+        name = self._nameregex2.sub(' ', name)
+        return name.casefold()
+
+    def _progress(self, progress):
+        print(progress)
 
 if __name__ == "__main__":
     CheckCalendarsApp(config=AppConfig())

@@ -15,19 +15,27 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
-#: action-checkcalendars.py:57
-msgid "STR_EVENT"
-msgstr "{subject} from {start} to {end}. "
-
-#: action-checkcalendars.py:57
+#: action-checkcalendars.py:168
 msgid "STR_EVENT_ALL_DAY"
 msgstr "{subject} all day {day}. "
 
-#: action-checkcalendars.py:58
+#: action-checkcalendars.py:159
+msgid "FORMAT_DATE_TIME_12"
+msgstr "%A, %B %-d at %-I %-M %p"
+
+#: action-checkcalendars.py:161
+msgid "FORMAT_DATE_TIME_24"
+msgstr "%A, %B %-d at %-H %-M %p"
+
+#: action-checkcalendars.py:177
+msgid "STR_EVENT"
+msgstr "{subject} from {start} to {end}. "
+
+#: action-checkcalendars.py:181
 msgid "STR_EVENTS"
 msgstr "For {timeref}, you have: {events}"
 
-#: action-checkcalendars.py:61
+#: action-checkcalendars.py:184
 msgid "STR_NO_EVENTS"
 msgstr "You have no events for {timeref}."
 
