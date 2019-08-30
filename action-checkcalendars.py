@@ -3,7 +3,7 @@
 from datetime import timedelta
 import gettext
 import locale
-import os
+from os import environ
 import re
 import sys
 import threading
@@ -105,12 +105,12 @@ class CheckCalendarsApp(HermesSnipsApp):
         # Iterate through the whole set of calendars
         if 'token' in self.config['secret']:
             self.token = self.config['secret']['token']
-        else:
-            self.token = os.environ['HASSIO_TOKEN']
+        elif 'HASSIO_TOKEN' in environ:
+            self.token = environ['HASSIO_TOKEN']
 
         if 'url' in self.config['secret']:
             self.url = self.config['secret']['url']
-        elif self.token is not None:
+        elif self.token is not None and 'HASSIO_TOKEN' in environ:
             self.url = 'http://hassio/homeassistant/api'
 
         self.api = API(api_root_url = self.url,
