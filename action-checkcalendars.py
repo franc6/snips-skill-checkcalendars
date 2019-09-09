@@ -7,10 +7,10 @@ from os import environ
 import re
 import sys
 import threading
-import warnings
+#import warnings
 
 import arrow
-from arrow.factory import ArrowParseWarning
+#from arrow.factory import ArrowParseWarning
 from dumper import dump
 from simple_rest_client.api import API
 
@@ -29,7 +29,7 @@ from hermes_python.ffi.ontology import Grain
 
 from CalendarResource import CalendarResource
 
-warnings.simplefilter('ignore', ArrowParseWarning)
+#warnings.simplefilter('ignore', ArrowParseWarning)
 
 # Set up localse
 locale.setlocale(locale.LC_ALL, '')
