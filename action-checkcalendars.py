@@ -134,6 +134,7 @@ class CheckCalendarsApp(HermesSnipsApp):
         """Gets the names as an AddFromVanillaInjectionRequest"""
         calendar_names = []
         for calendar in self.calendars:
+            self._progress('Adding calendar name: {}'.format(calendar['name']))
             calendar_names.append(calendar['name'])
         return AddFromVanillaInjectionRequest({'CalendarName': calendar_names})
 
@@ -195,7 +196,8 @@ class CheckCalendarsApp(HermesSnipsApp):
         #hermes.publish_end_session(session_id, sentence)
 
     def _get_events(self, calendar, start, end):
-        self._progress("Getting events for calendar: {}".format(calendar['name']))
+        date_format = gettext("FORMAT_DATE_TIME_24")
+        self._progress("Getting events for calendar: {} start: {} end: {}".format(calendar['name'], start.strftime(date_format), end.strftime(date_format)))
         response = self.api.calendars.events(calendar['entity_id'], start, end)
         return response.body
 
