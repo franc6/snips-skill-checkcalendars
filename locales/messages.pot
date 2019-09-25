@@ -15,6 +15,14 @@ msgstr ""
 "Generated-By: pygettext.py 1.5\n"
 
 
+#: action-checkcaldendars.py:103
+msgid "PLEASE_WAIT_PLURAL"
+msgstr ""
+
+#: action-checkcaldendars.py:105
+msgid "PLEASE_WAIT"
+msgstr ""
+
 #: action-checkcalendars.py:168
 msgid "STR_EVENT_ALL_DAY"
 msgstr ""
@@ -38,4 +46,3 @@ msgstr ""
 #: action-checkcalendars.py:184
 msgid "STR_NO_EVENTS"
 msgstr ""
-

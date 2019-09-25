@@ -92,12 +92,17 @@ class CheckCalendarsApp(HermesSnipsApp):
                 if cal['name'] == calendar_name:
                     calendar = cal
                     break;
+            if calendar is None:
+                self._progress("Didn\'t find a matching calendar: {}".format(calendar_name))
             # TODO: if calendar was not found, then snips didn't understand
             # the name of the calendar correctly; ask for clarification
             #if calendar is None:
 
         threading.Timer(interval=0.2, function=self._check_calendars, args=[hermes, intent_message.site_id, calendar, start, end, timeref]).start()
-        hermes.publish_end_session(intent_message.session_id, "Please wait while I check your calendars.")
+        if calendar is None:
+            hermes.publish_end_session(intent_message.session_id, gettext("PLEASE_WAIT_PLURAL"))
+        else:
+            hermes.publish_end_session(intent_message.session_id, gettext("PLEASE_WAIT").format(calendar=calendar['name']))
 
     def initialize(self):
         """Initialization; inject our calendar names"""
@@ -147,8 +152,10 @@ class CheckCalendarsApp(HermesSnipsApp):
         # At this point, we know which calendar the user wants, or if the
         # user wants all calendars, so get the events!
         if calendar is not None:
+            self._progress('Checking single calendar')
             event_list = self._get_events(calendar, start, end)
         else:
+            self._progress('Checking all calendars')
             event_list = []
             for calendar in self.calendars:
                 event_list.extend(self._get_events(calendar, start, end))
