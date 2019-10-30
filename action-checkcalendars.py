@@ -21,7 +21,7 @@ from hermes_python.ontology.injection import (
     InjectionRequestMessage,
     AddFromVanillaInjectionRequest
     )
-from hermes_python.ontology.dialogue import (
+from hermes_python.ontology.slot import (
     InstantTimeValue,
     TimeIntervalValue
     )
